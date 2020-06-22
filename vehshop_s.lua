@@ -1,7 +1,7 @@
 local maxVehiculeGarage = 7
 
 --> Version de la Resource : 
-local LatestVersion = ''; CurrentVersion = '1.0'
+local LatestVersion = ''; CurrentVersion = '1.1'
 PerformHttpRequest('https://raw.githubusercontent.com/NinjaSourceV2/GTA_Concessionnaire/master/VERSION', function(Error, NewestVersion, Header)
     LatestVersion = NewestVersion
     if CurrentVersion ~= NewestVersion then
@@ -43,18 +43,17 @@ AddEventHandler('CheckMoneyForVeh', function(name, vehicle, price)
 end)
 
 RegisterServerEvent('BuyForVeh')
-AddEventHandler('BuyForVeh', function(name, vehicle, price, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
-		local source = source
-		local license = GetPlayerIdentifiers(source)[1]
-        local name = name
-        local price = price
-        local vehicle = vehicle
-        local plate = plate
-        local state = "Sortit"
-        local primarycolor = primarycolor
-        local secondarycolor = secondarycolor
-        local pearlescentcolor = pearlescentcolor
-		local wheelcolor = wheelcolor
-		local valeurs = { license, name, vehicle, price, plate, state, primarycolor, secondarycolor, pearlescentcolor, wheelcolor }
-		exports.ghmattimysql:execute('INSERT INTO gta_joueurs_vehicle (`identifier`, `vehicle_name`, `vehicle_model`, `vehicle_price`, `vehicle_plate`, `vehicle_state`, `vehicle_colorprimary`, `vehicle_colorsecondary`, `vehicle_pearlescentcolor`, `vehicle_wheelcolor`) VALUES ?', { { valeurs } })
+AddEventHandler('BuyForVeh', function(name, vehicle, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
+	local source = source
+	local license = GetPlayerIdentifiers(source)[1]
+	local name = name
+	local vehicle = vehicle
+	local plate = plate
+	local state = "Sortit"
+	local primarycolor = primarycolor
+	local secondarycolor = secondarycolor
+	local pearlescentcolor = pearlescentcolor
+	local wheelcolor = wheelcolor
+	local valeurs = { license, name, vehicle, plate, state, primarycolor, secondarycolor, pearlescentcolor, wheelcolor }
+	exports.ghmattimysql:execute('INSERT INTO gta_joueurs_vehicle (`identifier`, `vehicle_name`, `vehicle_model`, `vehicle_plate`, `vehicle_state`, `vehicle_colorprimary`, `vehicle_colorsecondary`, `vehicle_pearlescentcolor`, `vehicle_wheelcolor`) VALUES ?', { { valeurs } })
 end)

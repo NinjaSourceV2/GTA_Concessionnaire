@@ -1,5 +1,6 @@
 --[[Register]]--
 local menuConfig = json.decode(LoadResourceFile(GetCurrentResourceName(), 'json/ConfigMenu.json'))
+local scaleform = nil
 
 local vehshop = {
 	opened = false,
@@ -10,14 +11,14 @@ local vehshop = {
 	selectedbutton = 0,
 	marker = { r = 0, g = 155, b = 255, a = 200, type = 1 },
 	menu = {
-		x = 0.8 + 0.07,
-		y = 0.05,
-		width = 0.2 + 0.05,
+		x = 0.1 + 0.03,
+		y = 0.0 + 0.03,
+		width = 0.2 + 0.02 + 0.005,
 		height = 0.04,
 		buttons = 10,
 		from = 1,
 		to = 10,
-		scale = 0.4,
+		scale = 0.3 + 0.05, --> Taille.
 		font = 0,
 		["main"] = {
 			title = "Concessionnaire",
@@ -406,6 +407,14 @@ function firstToUpper(str)
 end
 
 function OpenCreator()
+	scaleform = RequestScaleformMovie("mp_menu_glare")
+    while not HasScaleformMovieLoaded(scaleform) do
+        Citizen.Wait(0)
+	end
+	
+	PushScaleformMovieFunction(scaleform, "initScreenLayout")
+	PopScaleformMovieFunctionVoid()
+
     boughtcar = false
     local ped = LocalPed()
     local pos = currentlocation.pos.inside
@@ -430,7 +439,6 @@ function CloseCreator(name, veh, price)
         else
             local name = name
             local vehicle = veh
-            local price = price
             local veh = GetVehiclePedIsUsing(ped)
             local model = GetEntityModel(veh)
             local colors = table.pack(GetVehicleColours(veh))
@@ -469,7 +477,7 @@ function CloseCreator(name, veh, price)
             local secondarycolor = colors[2]
             local pearlescentcolor = extra_colors[1]
             local wheelcolor = extra_colors[2]
-            TriggerServerEvent('BuyForVeh', name, vehicle, price, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
+            TriggerServerEvent('BuyForVeh', name, vehicle, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
         end
         vehshop.opened = false
         vehshop.menu.from = 1
@@ -502,6 +510,19 @@ function drawMenuButton(button,x,y,selected)
 	DrawText(x - menu.width/2 + 0.005, y - menu.height/2 + 0.0028)
 end
 
+
+function DrawTextMenu(fonteP, stringT, scale, posX, posY)
+    SetTextFont(fonteP)
+    SetTextProportional(0)
+    SetTextScale(scale, scale)
+    SetTextColour(255, 255, 255, 255)
+    SetTextCentre(true)
+    SetTextEntry("STRING")
+    AddTextComponentString(stringT)
+    DrawText(posX, posY)
+end
+
+
 function drawMenuTitle(txt,x,y)
 	local menu = vehshop.menu
 	SetTextFont(0)
@@ -512,7 +533,9 @@ function drawMenuTitle(txt,x,y)
 	for i=1, #menuConfig do 
 		DrawRect(x,y,menu.width,menu.height, menuConfig[i].couleurTopMenu.r, menuConfig[i].couleurTopMenu.g, menuConfig[i].couleurTopMenu.b, menuConfig[i].couleurTopMenu.a)
 	end
-	DrawText(x - menu.width/2 + 0.005, y - menu.height/2 + 0.0028)
+	DrawTextMenu(1, txt, 0.8,menu.width - 0.4 / 2 + 0.1 + 0.005, y - menu.height/2 + 0.01, 255, 255, 255)
+    DrawSprite("commonmenu", "interaction_bgd", x,y, menu.width,menu.height + 0.04 + 0.007, .0, 255, 255, 255, 255)
+    DrawScaleformMovie(scaleform, 0.42 + 0.003,0.45, 0.9,0.9)
 end
 
 function drawMenuRight(txt,x,y,selected)
@@ -529,7 +552,7 @@ function drawMenuRight(txt,x,y,selected)
 	SetTextCentre(0)
 	SetTextEntry("STRING")
 	AddTextComponentString(txt)
-	DrawText(x + menu.width/2 - 0.03, y - menu.height/2 + 0.0028)
+	DrawTextMenu(0, txt, 0.4, menu.width - 0.4 / 2 + 0.1 + 0.09, y - menu.height/2 + 0.03 + 0.003, 255, 255, 255)
 end
 
 function tablelength(T)
@@ -688,7 +711,7 @@ Citizen.CreateThread(function()
 					else
 						selected = false
 					end
-					drawMenuButton(button,vehshop.menu.x,y,selected)
+					drawMenuButton(button,vehshop.menu.x,y + 0.02 + 0.003,selected)
 					if button.costs ~= nil then
 						if vehshop.currentmenu == "compacts" or vehshop.currentmenu == "coupes" or vehshop.currentmenu == "sedans" or vehshop.currentmenu == "sports" or vehshop.currentmenu == "sportsclassics" or vehshop.currentmenu == "super" or vehshop.currentmenu == "muscle" or vehshop.currentmenu == "offroad" or vehshop.currentmenu == "suvs" or vehshop.currentmenu == "vans" or vehshop.currentmenu == "industrial" or vehshop.currentmenu == "cycles" or vehshop.currentmenu == "motorcycles" or vehshop.currentmenu == "velos" then
 							DoesPlayerHaveVehicle(button.model,button,y,selected)
@@ -793,6 +816,13 @@ AddEventHandler('playerSpawned', function(spawn)
         firstspawn = 1
     end
 end)
+
+AddEventHandler('onResourceStart', function(resourceName)
+	if (GetCurrentResourceName() ~= resourceName) then
+	  return
+	end
+	ShowVehshopBlips(true)
+  end)
 
 
 RegisterNetEvent('GTA_Vehicule:DonnerJoueurVehiculeGratuit')
