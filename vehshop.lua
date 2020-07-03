@@ -471,7 +471,7 @@ function CloseCreator(name, veh, price)
             SetVehicleColours(personalVehicle, colors[1], colors[2])
             SetVehicleExtraColours(personalVehicle, extra_colors[1], extra_colors[2])
             TaskWarpPedIntoVehicle(GetPlayerPed(-1), personalVehicle, -1)
-            TriggerEvent("garages:setPersonalVehicle", personalVehicle)
+			TriggerEvent('garages:SetVehiculePerso', personalVehicle)
             SetEntityVisible(ped, true)
             local primarycolor = colors[1]
             local secondarycolor = colors[2]
@@ -806,7 +806,7 @@ AddEventHandler('FinishMoneyCheckForVeh', function(name, vehicle, price)
     local vehicle = vehicle
     local price = price
     boughtcar = true
-    CloseCreator(name, vehicle, price)
+	CloseCreator(name, vehicle, price)
 end)
 
 
