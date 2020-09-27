@@ -1,12 +1,14 @@
-fx_version 'bodacious'
+fx_version 'cerulean'
 game 'gta5'
-
-
-files {
-    'json/**/*'
-}
 
 dependencies {'ghmattimysql'}
 
-server_script 'vehshop_s.lua'
-client_script 'vehshop.lua'
+server_scripts {
+    'config/config.lua',
+    'server/server.lua'
+}
+
+client_scripts {
+    'config/config.lua',
+    'client/client_main.lua'
+}

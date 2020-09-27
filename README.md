@@ -7,9 +7,9 @@ Un simple concess vous permettant d'acheter le véhicule de vos rêves.
 --------------||by Super.Cool.Ninja||--------------
 
 
-
 ## Features
 - Achat de véhicule, logic.
+- Tout est dans le fichier config.
 
 ## Requis :
 il vous faudra avant tout #GTA_Garage pour une utilisation sans issues.
