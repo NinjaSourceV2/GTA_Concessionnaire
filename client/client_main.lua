@@ -3,7 +3,7 @@ local vConcessPos, vehPos, secondVehPos, vehZone, monVeh = nil, nil, nil, nil, n
 
 --> Permet au joueur d'utilisé le véhicule.
 RegisterNetEvent("GTA_Concess:PaiementEffectuer") 
-AddEventHandler("GTA_Concess:PaiementEffectuer", function(index, id, veh, model)
+AddEventHandler("GTA_Concess:PaiementEffectuer", function(index, id, veh, model, platecaissei, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
     local playerPed = GetPlayerPed(-1)
     local playerCoords = GetEntityCoords(playerPed)
     local headingVeh = GetEntityHeading(veh)
@@ -26,6 +26,9 @@ AddEventHandler("GTA_Concess:PaiementEffectuer", function(index, id, veh, model)
         end
 
         personnalVeh = CreateVehicle(model, playerCoords, headingVeh, true, false)
+        SetVehicleNumberPlateText(personnalVeh, platecaissei)
+        SetVehicleColours(personnalVeh, tonumber(primarycolor), tonumber(secondarycolor))
+        SetVehicleExtraColours(personnalVeh, tonumber(pearlescentcolor), tonumber(wheelcolor))
         TaskWarpPedIntoVehicle(playerPed, personnalVeh, -1)
     end
 end)
