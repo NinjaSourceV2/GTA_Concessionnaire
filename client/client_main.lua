@@ -1,60 +1,61 @@
-local vehiculeInfo = {
-    zone = nil,
-    veh = nil,
-    ConcessPos = nil
-}
-
 local Duree = 0
+local vConcessPos, vehPos, secondVehPos, vehZone, monVeh = nil, nil, nil, nil, nil
 
-local function InputText()
-    local text = ""
+--> Permet au joueur d'utilisé le véhicule.
+RegisterNetEvent("GTA_Concess:PaiementEffectuer") 
+AddEventHandler("GTA_Concess:PaiementEffectuer", function(index, id, veh, model)
+    local playerPed = GetPlayerPed(-1)
+    local playerCoords = GetEntityCoords(playerPed)
+    local headingVeh = GetEntityHeading(veh)
+
+    --> Refresh pour la table : 
+    vConcessPos = Config.Locations[index]["Concess"]["VehPos"]
+    vConcessPos[id] = nil
+
+    --> Fake véhicule : 
+    FreezeEntityPosition(veh, false)
+    SetEntityAsMissionEntity(veh, true, true)
+    Citizen.InvokeNative(0xEA386986E786A54F, Citizen.PointerValueIntInitialized(veh))
     
-	AddTextEntry('text', "Nouveau nom : ")
-    DisplayOnscreenKeyboard(1, "text", "", "", "", "", "", 20)
+    --> Nouveau Véhicule :
+    if playerPed ~= -1 then
+        RequestModel(model)
+        
+        while not HasModelLoaded(model) do
+            Citizen.Wait(0)
+        end
 
-    while (UpdateOnscreenKeyboard() == 0) do
-        DisableAllControlActions(0)
-        Wait(10)
-    end
-
-    if (GetOnscreenKeyboardResult()) then
-        text = GetOnscreenKeyboardResult()
-    end
-
-    return text
-end
-
-local Ninja_Core__DisplayHelpAlert = function(msg)
-	BeginTextCommandDisplayHelp("STRING");  
-    AddTextComponentSubstringPlayerName(msg);  
-    EndTextCommandDisplayHelp(0, 0, 1, -1);
-end
-
-RegisterNetEvent("GTA_Concess:PaiementEffectuer")
-AddEventHandler("GTA_Concess:PaiementEffectuer", function(id, veh)
-    for i = 1, #Config.Locations do 
-        vehiculeInfo.ConcessPos = Config.Locations[i]["Concess"]["VehPos"]
-        vehiculeInfo.ConcessPos[id] = nil
-        SetVehicleUndriveable(veh, 0)
+        personnalVeh = CreateVehicle(model, playerCoords, headingVeh, true, false)
+        TaskWarpPedIntoVehicle(playerPed, personnalVeh, -1)
     end
 end)
 
-local function DrawAdvancedText2(x,y ,w,h,sc, text, r,g,b,a,font,jus)
-    SetTextFont(font)
-    SetTextProportional(0)
-    SetTextScale(sc, sc)
-    N_0x4e096588b13ffeca(jus)
-    SetTextColour(r, g, b, a)
-    SetTextDropShadow(0, 0, 0, 0,255)
-    SetTextEdge(1, 0, 0, 0, 255)
-    SetTextDropShadow()
-    SetTextOutline()
-    SetTextEntry("STRING")
-    AddTextComponentString(text)
-    DrawText(x - 0.1+w, y - 0.02+h)
-end
+--> Permet de faire spawn les véhicules au démarrage du serveur.
+local function spawnVeh()
+    Citizen.CreateThread(function()        
+        for i = 1, #Config.Locations do 
+            vConcessPos = Config.Locations[i]["Concess"]["VehPos"]
+            local plyCoords = GetEntityCoords(GetPlayerPed(-1), false)
 
-local function StatsCar(x,y,z,text,zone, model, prix)
+            for _, v in pairs(vConcessPos) do
+                local dist = GetDistanceBetweenCoords(plyCoords, v["x"], v["y"], v["z"], true)
+
+                RequestModel(v["Model"])
+                while not HasModelLoaded(v["Model"]) do
+                    Wait(0)
+                end
+
+                monVeh = CreateVehicle(v["Model"], v["x"], v["y"], v["z"], v["h"], false, false)
+            end
+        end
+        Citizen.Wait(Duree)
+    end)
+end
+spawnVeh()
+
+
+--> Permet de draw le prix + le model.
+local function StatsCar(x,y,z,zone, model, prix) 
     local onScreen,_x,_y=World3dToScreen2d(x,y,z)
     
     if onScreen then
@@ -66,56 +67,36 @@ local function StatsCar(x,y,z,text,zone, model, prix)
     end
 end
 
-local function spawnVeh()
-    Citizen.CreateThread(function()		
-        Citizen.Wait(Duree)
-        for i = 1, #Config.Locations do 
-            vehiculeInfo.ConcessPos = Config.Locations[i]["Concess"]["VehPos"]
-            local plyCoords = GetEntityCoords(GetPlayerPed(-1), false)
 
-            for _, v in pairs(vehiculeInfo.ConcessPos) do
-                local dist = GetDistanceBetweenCoords(plyCoords, v["x"], v["y"], v["z"], true)
-
-                RequestModel(v["Model"])
-                while not HasModelLoaded(v["Model"]) do
-                    Wait(0)
-                end
-
-                vehiculeInfo.veh = CreateVehicle(v["Model"], v["x"], v["y"], v["z"], v["h"], true, false)
-                SetVehicleUndriveable(vehiculeInfo.veh, 1)
-            end
-        end
-    end)
-end
-spawnVeh()
-
+--> Ici on gére le process de la vente.
 Citizen.CreateThread(function()
     while true do
         Duree = 250
         for i = 1, #Config.Locations do
-            vehiculeInfo.ConcessPos = Config.Locations[i]["Concess"]["VehPos"]
-            vehiculeInfo.zone = Config.Locations[i]["Concess"]["NomZone"]
+            secondVehPos = Config.Locations[i]["Concess"]["VehPos"]
+            vehZone = Config.Locations[i]["Concess"]["NomZone"]
             local plyCoords = GetEntityCoords(GetPlayerPed(-1), false)
 
-            for k, v in pairs(vehiculeInfo.ConcessPos) do
+            for k, v in pairs(secondVehPos) do
                 local dist = GetDistanceBetweenCoords(plyCoords, v["x"], v["y"], v["z"], true)
         
-                if dist <= 20 then
+                if dist <= 15 then
                     Duree = 0
-                    local veh = GetVehiclePedIsIn(GetPlayerPed(-1))
-                    local model = GetEntityModel(veh)
-                    local platecaissei = GetVehicleNumberPlateText(veh)
-                    local colors = table.pack(GetVehicleColours(veh))
-                    local extra_colors = table.pack(GetVehicleExtraColours(veh))
-                    local primarycolor = colors[1]
-                    local secondarycolor = colors[2]
-                    local pearlescentcolor = extra_colors[1]
-                    local wheelcolor = extra_colors[2]
-
-                    StatsCar(v["x"], v["y"], v["z"], 'TEST', vehiculeInfo.zone, v["NomVehicule"], v["Prix"])
+                    StatsCar(v["x"], v["y"], v["z"], vehZone, v["NomVehicule"], v["Prix"])
 
                     if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+                        local veh = GetVehiclePedIsIn(GetPlayerPed(-1))
+                        local model = GetEntityModel(veh)
+                        local platecaissei = GetVehicleNumberPlateText(veh)
+                        local colors = table.pack(GetVehicleColours(veh))
+                        local extra_colors = table.pack(GetVehicleExtraColours(veh))
+                        local primarycolor = colors[1]
+                        local secondarycolor = colors[2]
+                        local pearlescentcolor = extra_colors[1]
+                        local wheelcolor = extra_colors[2]
+
                         if model == v["Model"] then
+                            FreezeEntityPosition(veh, true)
 
                             if GetLastInputMethod(0) then
                                 Ninja_Core__DisplayHelpAlert("~INPUT_PICKUP~ pour ~g~payé~w~ le véhicule.")
@@ -124,7 +105,7 @@ Citizen.CreateThread(function()
                             end
 
                             if (IsControlJustReleased(0, 38) or IsControlJustReleased(0, 179)) then
-                                TriggerServerEvent("GTA_Concess:PayerVehicule", v["Prix"], k, veh, "Mon Véhicule", model, platecaissei, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
+                                TriggerServerEvent("GTA_Concess:PayerVehicule", v["Prix"], i, k, veh, "Mon Véhicule", model, platecaissei, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
                             end
                         end
                     end
@@ -135,6 +116,8 @@ Citizen.CreateThread(function()
 	end
 end)
 
+
+--> permet l'affichage des blip sur la map.
 Citizen.CreateThread(function()
     for i = 1, #Config.Locations do
         local blip = Config.Locations[i]["Concess"]

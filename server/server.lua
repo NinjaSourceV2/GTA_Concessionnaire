@@ -1,5 +1,5 @@
 --> Version de la Resource : 
-local LatestVersion = ''; CurrentVersion = '1.3'
+local LatestVersion = ''; CurrentVersion = '1.5'
 PerformHttpRequest('https://raw.githubusercontent.com/NinjaSourceV2/GTA_Concessionnaire/master/VERSION', function(Error, NewestVersion, Header)
     LatestVersion = NewestVersion
     if CurrentVersion ~= NewestVersion then
@@ -8,19 +8,19 @@ PerformHttpRequest('https://raw.githubusercontent.com/NinjaSourceV2/GTA_Concessi
 end)
 
 RegisterServerEvent("GTA_Concess:PayerVehicule")
-AddEventHandler("GTA_Concess:PayerVehicule", function(prix, id, veh, newVehicleNom, model, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
+AddEventHandler("GTA_Concess:PayerVehicule", function(prix, index, id, veh, newVehicleNom, model, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
     local source = source
     TriggerEvent('GTA:GetInfoJoueurs', source, function(data)
         local identifier = GetPlayerIdentifiers(source)[1]
         local cash = data.argent_propre
         local nom = data.nom
         local prenom = data.prenom
-
         local proprietaire = (nom .. " " ..prenom) 
+
         if (tonumber(cash) >= prix) then
             local value = {identifier, newVehicleNom, model, plate, "Sortit", primarycolor, secondarycolor, pearlescentcolor, wheelcolor, proprietaire, prix}
 
-            TriggerClientEvent("GTA_Concess:PaiementEffectuer", source, id, veh)
+            TriggerClientEvent("GTA_Concess:PaiementEffectuer", source, index, id, veh, model)
             TriggerEvent('GTA:RetirerArgentPropre', source, tonumber(prix))
 
             exports.ghmattimysql:execute('INSERT INTO gta_joueurs_vehicle (`identifier`, `vehicle_name`, `vehicle_model`, `vehicle_plate`, `vehicle_state`, `vehicle_colorprimary`, `vehicle_colorsecondary`, `vehicle_pearlescentcolor`, `vehicle_wheelcolor`, `proprietaire`, `prix`) VALUES ?', { { value } })
