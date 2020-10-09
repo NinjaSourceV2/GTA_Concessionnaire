@@ -107,7 +107,7 @@ Citizen.CreateThread(function()
                                 Ninja_Core__DisplayHelpAlert("~INPUT_CELLPHONE_EXTRA_OPTION~ pour ~g~payé~w~ le véhicule.")
                             end
 
-                            if (IsControlJustReleased(0, 38) or IsControlJustReleased(0, 179)) then
+                            if (IsControlJustReleased(0, 38) or IsControlJustReleased(0, 193)) then
                                 TriggerServerEvent("GTA_Concess:PayerVehicule", v["Prix"], i, k, veh, "Mon Véhicule", model, platecaissei, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
                             end
                         end
