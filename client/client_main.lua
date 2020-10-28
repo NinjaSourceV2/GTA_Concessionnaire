@@ -98,17 +98,19 @@ Citizen.CreateThread(function()
                         local pearlescentcolor = extra_colors[1]
                         local wheelcolor = extra_colors[2]
 
-                        if model == v["Model"] then
-                            FreezeEntityPosition(veh, true)
+                        if dist <= 2 then
+                            if model == v["Model"] then
+                                FreezeEntityPosition(veh, true)
 
-                            if GetLastInputMethod(0) then
-                                Ninja_Core__DisplayHelpAlert("~INPUT_PICKUP~ pour ~g~payé~w~ le véhicule.")
-                            else
-                                Ninja_Core__DisplayHelpAlert("~INPUT_CELLPHONE_EXTRA_OPTION~ pour ~g~payé~w~ le véhicule.")
-                            end
+                                if GetLastInputMethod(0) then
+                                    Ninja_Core__DisplayHelpAlert("~INPUT_PICKUP~ pour ~g~payé~w~ le véhicule.")
+                                else
+                                    Ninja_Core__DisplayHelpAlert("~INPUT_CELLPHONE_EXTRA_OPTION~ pour ~g~payé~w~ le véhicule.")
+                                end
 
-                            if (IsControlJustReleased(0, 38) or IsControlJustReleased(0, 179)) then
-                                TriggerServerEvent("GTA_Concess:PayerVehicule", v["Prix"], i, k, veh, "Mon Véhicule", model, platecaissei, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
+                                if (IsControlJustReleased(0, 38) or IsControlJustReleased(0, 179)) then
+                                    TriggerServerEvent("GTA_Concess:PayerVehicule", v["Prix"], i, k, veh, "Mon Véhicule", model, platecaissei, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
+                                end
                             end
                         end
                     end
