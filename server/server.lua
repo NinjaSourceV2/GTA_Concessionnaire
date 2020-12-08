@@ -1,5 +1,5 @@
 --> Version de la Resource : 
-local LatestVersion = ''; CurrentVersion = '1.7'
+local LatestVersion = ''; CurrentVersion = '1.8'
 PerformHttpRequest('https://raw.githubusercontent.com/NinjaSourceV2/GTA_Concessionnaire/master/VERSION', function(Error, NewestVersion, Header)
     LatestVersion = NewestVersion
     if CurrentVersion ~= NewestVersion then
@@ -18,13 +18,11 @@ AddEventHandler("GTA_Concess:PayerVehicule", function(prix, index, id, veh, newV
         local proprietaire = (nom .. " " ..prenom) 
 
         if (tonumber(cash) >= prix) then
-            local value = {identifier, newVehicleNom, model, plate, "Sortit", primarycolor, secondarycolor, pearlescentcolor, wheelcolor, proprietaire, prix}
-
             TriggerClientEvent("GTA_Concess:PaiementEffectuer", source, index, id, veh, model, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
             TriggerEvent('GTA:RetirerArgentPropre', source, tonumber(prix))
+            local value = {identifier, newVehicleNom, model, plate, "Sortit", primarycolor, secondarycolor, pearlescentcolor, wheelcolor, proprietaire, prix}
 
-            exports.ghmattimysql:execute('INSERT INTO gta_joueurs_vehicle (`identifier`, `vehicle_name`, `vehicle_model`, `vehicle_plate`, `vehicle_state`, `vehicle_colorprimary`, `vehicle_colorsecondary`, `vehicle_pearlescentcolor`, `vehicle_wheelcolor`, `proprietaire`, `prix`) VALUES ?', { { value } })
-
+            MySQL.Sync.execute('INSERT INTO gta_joueurs_vehicle (`identifier`, `vehicle_name`, `vehicle_model`, `vehicle_plate`, `vehicle_state`, `vehicle_colorprimary`, `vehicle_colorsecondary`, `vehicle_pearlescentcolor`, `vehicle_wheelcolor`, `proprietaire`, `prix`) VALUES ?', { { value } })
 			TriggerClientEvent('nMenuNotif:showNotification', source, "~g~Paiement accepter~w~.")
 		else
 			TriggerClientEvent('nMenuNotif:showNotification', source, "~r~Tu n'as pas suffisamment d'argent !")
