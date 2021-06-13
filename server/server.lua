@@ -1,5 +1,5 @@
 --> Version de la Resource : 
-local LatestVersion = ''; CurrentVersion = '1.9'
+local LatestVersion = ''; CurrentVersion = '2.1'
 PerformHttpRequest('https://raw.githubusercontent.com/NinjaSourceV2/GTA_Concessionnaire/master/VERSION', function(Error, NewestVersion, Header)
     LatestVersion = NewestVersion
     if CurrentVersion ~= NewestVersion then
@@ -8,25 +8,23 @@ PerformHttpRequest('https://raw.githubusercontent.com/NinjaSourceV2/GTA_Concessi
 end)
 
 RegisterServerEvent("GTA_Concess:PayerVehicule")
-AddEventHandler("GTA_Concess:PayerVehicule", function(prix, index, id, veh, newVehicleNom, model, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
+AddEventHandler("GTA_Concess:PayerVehicule", function(prix, index, id, headingVeh, newVehicleNom, model, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
     local source = source
-    TriggerEvent('GTA:GetInfoJoueurs', source, function(data)
-        TriggerEvent('GTA:GetUserQtyItem', source, "Argent-Propre", function(argentPropreQty)
-            local identifier = GetPlayerIdentifiers(source)[1]
-            local cash = argentPropreQty
-            local nom = data.nom
-            local prenom = data.prenom
+    local identifier = GetPlayerIdentifiers(source)[1]
+
+    TriggerEvent('GTA:GetIdentityPlayer', source, function(data)
+        TriggerEvent('GTA_Inventaire:GetItemQty', source, "cash", function(qtyItem, itemid)
+            local nom = data["nom"]
+            local prenom = data["prenom"]
             local proprietaire = (nom .. " " ..prenom) 
 
-            if (tonumber(cash) >= prix) then
-                TriggerClientEvent("GTA_Concess:PaiementEffectuer", source, index, id, veh, model, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor)
-                TriggerEvent('GTA:RetirerArgentPropre', source, tonumber(prix))
+            if (qtyItem >= prix) then
+                TriggerClientEvent("GTA_Concess:DeleteCarForAll", -1, index, id, model)
+                TriggerClientEvent("GTA_Concess:PaiementEffectuer", source, headingVeh, model, plate, primarycolor, secondarycolor, pearlescentcolor, wheelcolor, "cash", itemid, prix)
                 local value = {identifier, newVehicleNom, model, plate, "Sortit", primarycolor, secondarycolor, pearlescentcolor, wheelcolor, proprietaire, prix}
-
                 MySQL.Sync.execute('INSERT INTO gta_joueurs_vehicle (`identifier`, `vehicle_name`, `vehicle_model`, `vehicle_plate`, `vehicle_state`, `vehicle_colorprimary`, `vehicle_colorsecondary`, `vehicle_pearlescentcolor`, `vehicle_wheelcolor`, `proprietaire`, `prix`) VALUES ?', { { value } })
-                TriggerClientEvent('nMenuNotif:showNotification', source, "~g~Paiement accepter~w~.")
             else
-                TriggerClientEvent('nMenuNotif:showNotification', source, "~r~Tu n'as pas suffisamment d'argent !")
+				TriggerClientEvent("GTAO:NotificationIcon", source, "CHAR_BANK_MAZE", "Maze Bank", "Pas assez de fond.", "Paiement refuser")
             end
         end)
     end)

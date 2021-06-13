@@ -17,11 +17,12 @@ function InputText()
     return text
 end
 
-Ninja_Core__DisplayHelpAlert = function(msg)
-	BeginTextCommandDisplayHelp("STRING");  
-    AddTextComponentSubstringPlayerName(msg);  
-    EndTextCommandDisplayHelp(0, 0, 1, -1);
+local square = math.sqrt
+function getDistance(a, b) 
+    local x, y, z = a.x-b.x, a.y-b.y, a.z-b.z
+    return square(x*x+y*y+z*z)
 end
+
 
 function DrawAdvancedText2(x,y ,w,h,sc, text, r,g,b,a,font,jus)
     SetTextFont(font)
